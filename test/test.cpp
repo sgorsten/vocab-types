@@ -150,6 +150,48 @@ TEST_CASE("variant emplace()")
     CHECK(std::get<1>(d).size() == 3);
 }
 
+TEST_CASE("visit variant")
+{
+    // Construct some variants
+    std::variant<int, double, std::string> a {5}, b {3.14}, c {"foo"};    
+
+    // Create a visitor that prints to a stream
+    std::ostringstream ss;
+    const auto print = [&ss](const auto & x) { ss << x; };
+
+    // Visit a, which should print the int alternative
+    ss.str("");
+    visit(print, a);
+    CHECK(ss.str() == "5");
+
+    // Visit b, which should print the double alternative
+    ss.str("");
+    visit(print, b);
+    CHECK(ss.str() == "3.14");
+
+    // Visit c, which should print the string alternative
+    ss.str("");
+    visit(print, c);
+    CHECK(ss.str() == "foo");
+
+    // Visit all three variants at once
+    ss.str("");
+    visit([&ss](auto x, auto y, auto z)
+    {
+        ss << x << ' ' << y << ' ' << z;
+    }, a, b, c);
+    CHECK(ss.str() == "5 3.14 foo");
+
+    // Use a modifying visitor on all three variants
+    const auto add_letter_a = [](auto & x) { x += 'A'; };
+    visit(add_letter_a, a);
+    visit(add_letter_a, b);
+    visit(add_letter_a, c);
+    CHECK(std::get<0>(a) == 5 + 'A');
+    CHECK(std::get<1>(b) == 3.14 + 'A');
+    CHECK(std::get<2>(c) == "fooA");
+}
+
 TEST_CASE("construct null std::optional<T>")
 {
     const std::optional<int> a;
