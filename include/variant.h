@@ -225,7 +225,7 @@ public:
     // emplace - http://en.cppreference.com/w/cpp/utility/variant/emplace/ //
     /////////////////////////////////////////////////////////////////////////
 
-    template<class T,  class... Args> void emplace(Args&&... args) { emplace<index_of<T, Types...>::value>(std::forward<Args>(args)...); }                                    // (1)
+    template<class T,  class... Args> void emplace(Args&&... args) { emplace<detail::index_of<T, Types...>::value>(std::forward<Args>(args)...); }                                    // (1)
     template<size_t I, class... Args> void emplace(Args&&... args) { _Reset(); new(&_Storage) variant_alternative_t<I, variant>(std::forward<Args>(args)...); _Index = I; } // (3)
 };
 
