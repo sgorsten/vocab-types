@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="include">
+      <UniqueIdentifier>{4dcd72a0-43fe-450d-9ac3-d4c3e52f9abe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="test">
+      <UniqueIdentifier>{cfef1c80-3b13-4489-a93e-cb5e7be2b03f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\optional.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\variant.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="doctest.h">
+      <Filter>test</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
