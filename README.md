@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/1ylttmu6a95uhsoy?svg=true)](https://ci.appveyor.com/project/sgorsten/vocab-types)
+
 # vocab-types
 
 This is a doomed project. Its days were numbered before it even began.
