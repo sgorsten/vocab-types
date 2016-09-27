@@ -10,3 +10,9 @@ Note that as these files are intended to be temporary standins for the actual st
 
 - [optional.h](/include/optional.h): A standin for the `<optional>` standard library header
 - [variant.h](/include/variant.h): A standin for the `<variant>` standard library header
+
+# License
+
+The files listed above are 100% my original work, based solely on the documentation available at [cppreference.com](http://en.cppreference.com/w/), which I believe allow me to offer them under the terms of the [Unlicense](http://unlicense.org/). 
+
+The unit tests are built with Viktor Kirilov's [doctest](https://github.com/onqtam/doctest) framework, which is available under the terms of the [MIT Software License](https://opensource.org/licenses/MIT).
