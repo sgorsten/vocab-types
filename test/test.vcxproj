@@ -146,6 +146,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="test-any.cpp" />
+    <ClCompile Include="test-optional.cpp" />
+    <ClCompile Include="test-variant.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>

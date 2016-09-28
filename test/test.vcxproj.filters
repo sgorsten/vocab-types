@@ -29,5 +29,14 @@
     <ClCompile Include="test.cpp">
       <Filter>test</Filter>
     </ClCompile>
+    <ClCompile Include="test-any.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test-variant.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test-optional.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

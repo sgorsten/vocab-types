@@ -89,7 +89,7 @@ public:
 // std::swap - http://en.cppreference.com/w/cpp/utility/any/swap2 //
 ////////////////////////////////////////////////////////////////////
 
-void swap(any& lhs, any& rhs) noexcept { lhs.swap(rhs); }
+inline void swap(any& lhs, any& rhs) noexcept { lhs.swap(rhs); }
 
 //////////////////////////////////////////////////////////////////////////////
 // bad_any_cast - http://en.cppreference.com/w/cpp/utility/any/bad_any_cast //
