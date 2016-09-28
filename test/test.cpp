@@ -79,6 +79,19 @@ TEST_CASE("construct std::variant<T...>")
     CHECK(std::get<1>(d) == double{3.14});
 }
 
+TEST_CASE("construct std::variant<T...> with initializer list")
+{
+    std::variant<std::vector<double>, std::string> v {std::in_place<0>, {1.0, 2.1, 3.2, 4.5, 5.8}};
+    CHECK(v.index() == 0);
+    CHECK(std::get<0>(v).size() == 5);
+    CHECK(std::get<0>(v)[2] == 3.2);
+
+    std::variant<std::vector<double>, std::string> w {std::in_place<std::string>, {'h', 'e', 'l', 'l', 'o'}};
+    CHECK(w.index() == 1);
+    CHECK(std::get<1>(w).size() == 5);
+    CHECK(std::get<1>(w)[2] == 'l');
+}
+
 TEST_CASE("variant move and copy construction and assignment")
 {
     typedef std::variant<int, std::vector<double>> variant_t;

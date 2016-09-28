@@ -33,7 +33,8 @@ public:
     optional(optional && other) = default; // (3)
     constexpr optional(const T & value) : _Value(value) {} // (4)
     constexpr optional(T && value) : _Value(move(value)) {} // (5)
-    template<class... Args> constexpr explicit optional(std::in_place_t, Args&&... args) : _Value(in_place<1>, std::forward<Args>(args)...) {} // (6)
+    template<class... Args> constexpr explicit optional(in_place_t, Args&&... args) : _Value(in_place<1>, std::forward<Args>(args)...) {} // (6)
+    template<class U, class... Args> constexpr explicit optional(in_place_t, initializer_list<U> ilist, Args&&... args) : _Value(in_place<1>, ilist, std::forward<Args>(args)...) {} // (7)
 
     //////////////////////////////////////////////////////////////////////////////////
     // (destructor) - http://en.cppreference.com/w/cpp/utility/optional/%7Eoptional //
@@ -101,6 +102,7 @@ public:
     /////////////////////////////////////////////////////////////////////////
 
     template<class... Args> void emplace(Args &&... args) { _Value.emplace(std::in_place_index_t<1>{}, std::forward<Args>(args)...); }
+    template<class U, class... Args> void emplace(initializer_list<U> ilist, Args&&... args) { _Value.emplace(std::in_place_index_t<1>{}, ilist, std::forward<Args>(args)...); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
