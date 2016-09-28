@@ -16,6 +16,7 @@ namespace detail {
 template<class... Types> struct constructor_selection_helper {};
 template<> struct constructor_selection_helper<> { void f(); };
 template<class First, class... Rest> struct constructor_selection_helper<First, Rest...> : constructor_selection_helper<Rest...> { First f(First); using constructor_selection_helper<Rest...>::f; };
+template<class... Types, class T> auto construct(T && t) { return constructor_selection_helper<Types...>{}.f(std::forward<T>(t)); }
 
 // Determine the index of a type in a type list
 template<class T, class... Types> struct index_of;
@@ -98,36 +99,7 @@ constexpr std::size_t variant_npos = -1;
 
 template<class... Types> class variant
 {
-    void _Reset()
-    {
-        if(_Index != variant_npos)
-        {
-            visit([](auto & x) { detail::invoke_destructor(x); }, *this);
-            _Index = variant_npos;
-        }
-    }
-
-    template<class U> void _Construct(U && rhs) try
-    { 
-        _Reset();
-        _Index = rhs._Index;
-        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::forward<decltype(r)>(r)); }); 
-    }
-    catch(...)
-    {
-        _Index = variant_npos;
-        throw;
-    }
-
-    template<class U> void _Assign(U && rhs)
-    {
-        assert(_Index == rhs._Index);
-        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { l = std::forward<decltype(r)>(r); });
-    }
 public:
-    std::aligned_union_t<0, Types...> _Storage;
-    size_t _Index = variant_npos;
-    
     //////////////////////////////////////////////////////////////////////////////
     // (constructor) - http://en.cppreference.com/w/cpp/utility/variant/variant //
     //////////////////////////////////////////////////////////////////////////////
@@ -170,9 +142,9 @@ public:
 
     template<class T> std::enable_if_t<!std::is_same<std::remove_reference_t<std::remove_cv_t<T>>, variant>::value, variant> & operator=(T && t) // (3)
     {
-        typedef decltype(detail::constructor_selection_helper<Types...>{}.f(std::forward<T>(t))) U;
+        using U = decltype(detail::construct<Types...>(std::forward<T>(t)));
         constexpr size_t I = detail::index_of<U, Types...>::value;
-        if(_Index == I) *reinterpret_cast<U *>(&_Storage) = std::forward<T>(t);
+        if(_Index == I) _Unchecked_get<I>() = std::forward<T>(t);
         else emplace<I>(std::forward<T>(t));
         return *this;
     }
@@ -216,6 +188,39 @@ public:
             r = std::move(tmp);
         }
     }
+
+    template<size_t I> variant_alternative_t<I, variant> & _Unchecked_get() { return reinterpret_cast<variant_alternative_t<I, variant> &>(_Storage); }
+    template<size_t I> variant_alternative_t<I, variant> const & _Unchecked_get() const { return reinterpret_cast<variant_alternative_t<I, variant> const &>(_Storage); }
+private:
+    void _Reset()
+    {
+        if(_Index != variant_npos)
+        {
+            visit([](auto & x) { detail::invoke_destructor(x); }, *this);
+            _Index = variant_npos;
+        }
+    }
+
+    template<class U> void _Construct(U && rhs) try
+    { 
+        _Reset();
+        _Index = rhs._Index;
+        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::forward<decltype(r)>(r)); }); 
+    }
+    catch(...)
+    {
+        _Index = variant_npos;
+        throw;
+    }
+
+    template<class U> void _Assign(U && rhs)
+    {
+        assert(_Index == rhs._Index);
+        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { l = std::forward<decltype(r)>(r); });
+    }
+
+    std::aligned_union_t<0, Types...> _Storage;
+    size_t _Index = variant_npos;
 };
 
 //////////////////////////////////////////////////////////////
@@ -244,9 +249,9 @@ template<class T, class... Types> constexpr bool holds_alternative(const variant
 // get - http://en.cppreference.com/w/cpp/utility/variant/get //
 ////////////////////////////////////////////////////////////////
 
-template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> & get(variant<Types...> & v) { if(v.index() != I) throw bad_variant_access{}; return reinterpret_cast<variant_alternative_t<I, variant<Types...>> &>(v._Storage);  }
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> & get(variant<Types...> & v) { if(v.index() == I) return v._Unchecked_get<I>(); throw bad_variant_access{}; }
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> && get(variant<Types...> && v) { return std::move(get<I>(v)); }                        
-template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v) { if(v.index() != I) throw bad_variant_access{}; return reinterpret_cast<variant_alternative_t<I, variant<Types...>> const &>(v._Storage);  }
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v) { if(v.index() == I) return v._Unchecked_get<I>(); throw bad_variant_access{}; }
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const && get(const variant<Types...> && v) { return std::move(get<I>(v)); }
 template<class T, class... Types> constexpr       T &  get(      variant<Types...> &  v) { return get<index_of<T, Types...>::value>(v); }
 template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<index_of<T, Types...>::value>(std::move(v)); }
