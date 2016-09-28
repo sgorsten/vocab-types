@@ -1,6 +1,7 @@
 #ifndef EARLY17_VARIANT
 #define EARLY17_VARIANT
 
+#include <cassert>
 #include <stdexcept>
 #include <type_traits>
 
@@ -8,28 +9,6 @@ namespace std {
 
 // Forward declare types
 template<class... Types> class variant;
-
-//////////////////////////////////////////////////////////////////////////////////
-// variant_size - http://en.cppreference.com/w/cpp/utility/variant/variant_size //
-//////////////////////////////////////////////////////////////////////////////////
-
-template<class T> struct variant_size;
-template<class... Types> struct variant_size<std::variant<Types...>> : std::integral_constant<std::size_t, sizeof...(Types)> {}; // (2)
-template<class T> class variant_size<const T> : public variant_size<T> {}; // (3)
-template<class T> class variant_size<volatile T> : public variant_size<T> {}; // (3)
-template<class T> class variant_size<const volatile T> : public variant_size<T> {}; // (3)	
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// variant_alternative - http://en.cppreference.com/w/cpp/utility/variant/variant_alternative //
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-template<size_t I, class T> class variant_alternative;
-template<class First, class... Rest> class variant_alternative<0, variant<First, Rest...>> { public: typedef First type; };
-template<size_t I, class First, class... Rest> class variant_alternative<I, variant<First, Rest...>> { public: typedef typename variant_alternative<I-1, variant<Rest...>>::type type; };
-template<size_t I, class T> class variant_alternative<I, const T> { public: typedef std::add_const_t<typename variant_alternative<I,T>::type> type; };
-template<size_t I, class T> class variant_alternative<I, volatile T> { public: typedef std::add_volatile_t<typename variant_alternative<I,T>::type> type; };
-template<size_t I, class T> class variant_alternative<I, const volatile T> { public: typedef std::add_cv_t<typename variant_alternative<I,T>::type> type; };
-template<size_t I, class T> using variant_alternative_t = typename variant_alternative<I, T>::type;
 
 namespace detail {
 
@@ -86,6 +65,28 @@ constexpr bool operator!=(monostate, monostate) noexcept { return false; }
 class bad_variant_access : public std::exception { public: bad_variant_access() : std::exception("bad_variant_access") {} };
 
 //////////////////////////////////////////////////////////////////////////////////
+// variant_size - http://en.cppreference.com/w/cpp/utility/variant/variant_size //
+//////////////////////////////////////////////////////////////////////////////////
+
+template<class T> struct variant_size;
+template<class... Types> struct variant_size<std::variant<Types...>> : std::integral_constant<std::size_t, sizeof...(Types)> {}; // (2)
+template<class T> class variant_size<const T> : public variant_size<T> {}; // (3)
+template<class T> class variant_size<volatile T> : public variant_size<T> {}; // (3)
+template<class T> class variant_size<const volatile T> : public variant_size<T> {}; // (3)	
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// variant_alternative - http://en.cppreference.com/w/cpp/utility/variant/variant_alternative //
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<size_t I, class T> class variant_alternative;
+template<class First, class... Rest> class variant_alternative<0, variant<First, Rest...>> { public: typedef First type; };
+template<size_t I, class First, class... Rest> class variant_alternative<I, variant<First, Rest...>> { public: typedef typename variant_alternative<I-1, variant<Rest...>>::type type; };
+template<size_t I, class T> class variant_alternative<I, const T> { public: typedef std::add_const_t<typename variant_alternative<I,T>::type> type; };
+template<size_t I, class T> class variant_alternative<I, volatile T> { public: typedef std::add_volatile_t<typename variant_alternative<I,T>::type> type; };
+template<size_t I, class T> class variant_alternative<I, const volatile T> { public: typedef std::add_cv_t<typename variant_alternative<I,T>::type> type; };
+template<size_t I, class T> using variant_alternative_t = typename variant_alternative<I, T>::type;
+
+//////////////////////////////////////////////////////////////////////////////////
 // variant_npos - http://en.cppreference.com/w/cpp/utility/variant/variant_npos //
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -97,14 +98,6 @@ constexpr std::size_t variant_npos = -1;
 
 template<class... Types> class variant
 {
-    void _Copy_construct(const variant & r) { detail::visit_same(*this, r, [](auto & l, const auto & r) { new(&l) std::remove_reference_t<decltype(l)>(r); }); }
-    void _Move_construct(variant && r) { detail::visit_same(*this, std::move(r), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::move(r)); }); }
-    void _Copy_assign(const variant & r) { detail::visit_same(*this, r, [](auto & l, const auto & r) { l = r; }); }
-    void _Move_assign(variant && r) { detail::visit_same(*this, std::move(r), [](auto & l, auto && r) { l = std::move(r); }); }
-public:
-    std::aligned_union_t<0, Types...> _Storage;
-    size_t _Index;
-
     void _Reset()
     {
         if(_Index != variant_npos)
@@ -113,20 +106,41 @@ public:
             _Index = variant_npos;
         }
     }
+
+    template<class U> void _Construct(U && rhs) try
+    { 
+        _Reset();
+        _Index = rhs._Index;
+        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::forward<decltype(r)>(r)); }); 
+    }
+    catch(...)
+    {
+        _Index = variant_npos;
+        throw;
+    }
+
+    template<class U> void _Assign(U && rhs)
+    {
+        assert(_Index == rhs._Index);
+        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { l = std::forward<decltype(r)>(r); });
+    }
+public:
+    std::aligned_union_t<0, Types...> _Storage;
+    size_t _Index = variant_npos;
     
     //////////////////////////////////////////////////////////////////////////////
     // (constructor) - http://en.cppreference.com/w/cpp/utility/variant/variant //
     //////////////////////////////////////////////////////////////////////////////
 
-    constexpr variant()                                                                                                         : _Index(variant_npos) { emplace<0>(); } // (1)
-    variant(const variant & other)                                                                                              : _Index(other._Index) { if(_Index != variant_npos) _Copy_construct(other); } // (2)
-    variant(variant && other)                                                                                                   : _Index(other._Index) { if(_Index != variant_npos) _Move_construct(std::move(other)); } // (3)
-    template<class T> variant(T && t)                                                                                           : _Index(variant_npos) { *this = std::forward<T>(t); } // (4)
+    constexpr variant()                                                                                                         { emplace<0>(); } // (1)
+    variant(const variant & other)                                                                                              { if(!other.valueless_by_exception()) _Construct(other); } // (2)
+    variant(variant && other)                                                                                                   { if(!other.valueless_by_exception()) _Construct(std::move(other)); } // (3)
+    template<class T> variant(T && t)                                                                                           { *this = std::forward<T>(t); } // (4)
 
-    template<class T, class... Args> explicit variant(in_place_type_t<T>, Args&&... args)                                       : _Index(variant_npos) { emplace<T>(std::forward<Args>(args)...); } // (5)
-    template<class T, class U, class... Args > explicit variant(in_place_type_t<T>, initializer_list<U> il, Args&&... args)     : _Index(variant_npos) { emplace<T>(il, std::forward<Args>(args)...); } // (6)
-    template<size_t I, class... Args> explicit variant(in_place_index_t<I>, Args&&... args)                                     : _Index(variant_npos) { emplace<I>(std::forward<Args>(args)...); } // (7)
-    template<size_t I, class U, class... Args> explicit variant(in_place_index_t<I>, initializer_list<U> il, Args&&... args)    : _Index(variant_npos) { emplace<I>(il, std::forward<Args>(args)...); } // (8)
+    template<class T, class... Args> explicit variant(in_place_type_t<T>, Args&&... args)                                       { emplace<T>(std::forward<Args>(args)...); } // (5)
+    template<class T, class U, class... Args > explicit variant(in_place_type_t<T>, initializer_list<U> il, Args&&... args)     { emplace<T>(il, std::forward<Args>(args)...); } // (6)
+    template<size_t I, class... Args> explicit variant(in_place_index_t<I>, Args&&... args)                                     { emplace<I>(std::forward<Args>(args)...); } // (7)
+    template<size_t I, class U, class... Args> explicit variant(in_place_index_t<I>, initializer_list<U> il, Args&&... args)    { emplace<I>(il, std::forward<Args>(args)...); } // (8)
 
     ////////////////////////////////////////////////////////////////////////////////
     // (destructor) - http://en.cppreference.com/w/cpp/utility/variant/%7Evariant //
@@ -140,30 +154,17 @@ public:
 
     variant& operator=(const variant& rhs) // (1)
     {
-        if(rhs.valueless_by_exception()) _Reset();
-        else if(_Index == rhs._Index) _Copy_assign(rhs);
+        if(rhs._Index == variant_npos) _Reset();
+        else if(_Index == rhs._Index) _Assign(rhs);
         else *this = variant{rhs};
         return *this;
     }
 
     variant& operator=(variant&& rhs) // (2)
     {
-        if(rhs.valueless_by_exception()) _Reset();
-        else if(_Index == rhs._Index) _Move_assign(std::move(rhs));
-        else 
-        {
-            _Reset();
-            try
-            {
-                _Index = rhs._Index;
-                _Move_construct(std::move(rhs));
-            }
-            catch(...) 
-            {
-                _Index = variant_npos;
-                throw;
-            }
-        }
+        if(rhs._Index == variant_npos) _Reset();
+        else if(_Index == rhs._Index) _Assign(std::move(rhs));
+        else _Construct(std::move(rhs));
         return *this;
     }
 
@@ -196,6 +197,25 @@ public:
     template<class T, class U, class... Args> void emplace(std::initializer_list<U> il, Args&&... args) { emplace<detail::index_of<T, Types...>::value>(il, std::forward<Args>(args)...); }                             // (2)
     template<size_t I, class... Args> void emplace(Args&&... args) { _Reset(); new(&_Storage) variant_alternative_t<I, variant>(std::forward<Args>(args)...); _Index = I; }                                             // (3)
     template<size_t I, class U, class... Args> void emplace(std::initializer_list<U> il, Args&&... args) { _Reset(); new(&_Storage) variant_alternative_t<I, variant>(il, std::forward<Args>(args)...); _Index = I; }   // (4)
+
+    //////////////////////////////////////////////////////////////////
+    // swap - http://en.cppreference.com/w/cpp/utility/variant/swap //
+    //////////////////////////////////////////////////////////////////
+
+    void swap(variant& rhs) // (1)
+    {
+        if(_Index == rhs._Index)
+        {
+            if(_Index == variant_npos) return;
+            detail::visit_same(*this, rhs, [](auto & l, auto & r) { return swap(l, r); });
+        }
+        else
+        {
+            variant tmp {std::move(*this)};
+            *this = std::move(r);
+            r = std::move(tmp);
+        }
+    }
 };
 
 //////////////////////////////////////////////////////////////
@@ -282,6 +302,12 @@ template<class... Types> constexpr bool operator>=(const variant<Types...>& v, c
         : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a >= b; });
 }
 	
+////////////////////////////////////////////////////////////////////////
+// std::swap - http://en.cppreference.com/w/cpp/utility/variant/swap2 //
+////////////////////////////////////////////////////////////////////////
+
+template<class... Types> void swap(variant<Types...>& lhs, variant<Types...>& rhs) { lhs.swap(rhs); }
+
 } // namespace std
 
 #endif

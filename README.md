@@ -16,7 +16,7 @@ Note that as these files are intended to be temporary standins for the actual st
 # TODO
 
 - [x] variant
-- [ ] swap (variant)
+- [x] swap (variant)
 - [x] visit
 - [x] holds_alternative
 - [x] get (variant)
@@ -27,10 +27,10 @@ Note that as these files are intended to be temporary standins for the actual st
 - [ ] forwarding allocators (variant)
 - [x] bad_variant_access
 - [x] optional
-- [ ] comparison operators (nullopt)
+- [x] comparison operators (optional)
 - [ ] make_optional
 - [x] nullopt
-- [x] bad_optinal_access
+- [x] bad_optional_access
 - [x] in_place
 
 # License
