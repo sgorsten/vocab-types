@@ -15,26 +15,15 @@ Note that as these files are intended to be temporary standins for the actual st
 - [any.h](/include/any.h): A standin for the `<any>` standard library header
 - [utility.h](/include/utility.h): Contains the additions to the `<utility>` standard library header required by `std::optional<T>`, `std::variant<T...>`, and `std::any`
 
-# TODO
+# Known Gaps
 
-- [x] variant
-- [x] swap (variant)
-- [x] visit
-- [x] holds_alternative
-- [x] get (variant)
-- [ ] get_if
-- [x] comparison operators (variant)
-- [x] std::monostate
+- [ ] get_if (variant)
 - [ ] std::hash (variant)
 - [ ] forwarding allocators (variant)
-- [x] bad_variant_access
-- [x] optional
-- [x] comparison operators (optional)
-- [ ] make_optional
-- [x] nullopt
-- [x] bad_optional_access
-- [x] in_place
-- [x] any
+- [ ] noexcept specifications are missing/incomplete
+- [ ] constexpr specifications are missing/incomplete
+- [ ] SFINAE for disabling some overloads based on type traits
+- [ ] Most of the API needs to be tested (are there existing unit tests for this?)
 
 # License
 
