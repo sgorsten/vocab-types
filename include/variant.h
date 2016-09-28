@@ -4,6 +4,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <type_traits>
+#include "utility.h"
 
 namespace std {
 
@@ -23,8 +24,6 @@ template<class T, class... Types> struct index_of;
 template<class T, class... Rest> struct index_of<T, T, Rest...> { constexpr static size_t value = 0; };
 template<class T, class First, class... Rest> struct index_of<T, First, Rest...> { constexpr static size_t value = 1 + index_of<T, Rest...>::value; };
 
-template<class T> struct tag_t {};
-template<size_t I> struct index_t {};
 template<class Visitor, class Variant> auto visit(Variant && var, index_t<0>, Visitor && vis) { return var.index() == 0 ? vis(std::get<0>(var)) : throw std::bad_variant_access{}; }
 template<class Visitor, class Variant, size_t I> auto visit(Variant && var, index_t<I>, Visitor && vis) { return var.index() == I ? vis(std::get<I>(var)) : visit(std::forward<Variant>(var), index_t<I-1>{}, std::forward<Visitor>(vis)); }
 
@@ -34,18 +33,6 @@ template<class Visitor, class Left, class Right> auto visit_same(Left && l, Righ
 template<class T> void invoke_destructor(T & x) { x.~T(); }
 
 } // namespace std::detail
-
-//////////////////////////////////////////////////////////////////
-// in_place - http://en.cppreference.com/w/cpp/utility/in_place //
-//////////////////////////////////////////////////////////////////
-
-struct in_place_tag { in_place_tag() = delete; }; 
-inline std::in_place_tag in_place() { throw std::logic_error{"bad call"}; } // (1)
-template<class T> std::in_place_tag in_place(detail::tag_t<T>) { throw std::logic_error{"bad call"}; } // (2)
-template<std::size_t I> std::in_place_tag in_place(detail::index_t<I>) { throw std::logic_error{"bad call"}; } // (3)
-using in_place_t = std::in_place_tag (&)();
-template<class T> using in_place_type_t = std::in_place_tag (&)(detail::tag_t<T>);
-template<std::size_t I> using in_place_index_t = std::in_place_tag (&)(detail::index_t<I>);
 
 ////////////////////////////////////////////////////////////////////////////
 // monostate - http://en.cppreference.com/w/cpp/utility/variant/monostate //

@@ -149,7 +149,9 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\any.h" />
     <ClInclude Include="..\include\optional.h" />
+    <ClInclude Include="..\include\utility.h" />
     <ClInclude Include="..\include\variant.h" />
     <ClInclude Include="doctest.h" />
   </ItemGroup>
