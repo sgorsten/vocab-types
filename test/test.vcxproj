@@ -148,12 +148,14 @@
   <ItemGroup>
     <ClCompile Include="test-any.cpp" />
     <ClCompile Include="test-optional.cpp" />
+    <ClCompile Include="test-string_view.cpp" />
     <ClCompile Include="test-variant.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\any.h" />
     <ClInclude Include="..\include\optional.h" />
+    <ClInclude Include="..\include\string_view.h" />
     <ClInclude Include="..\include\utility.h" />
     <ClInclude Include="..\include\variant.h" />
     <ClInclude Include="doctest.h" />

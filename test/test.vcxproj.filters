@@ -24,6 +24,9 @@
     <ClInclude Include="..\include\utility.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\string_view.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -36,6 +39,9 @@
       <Filter>test</Filter>
     </ClCompile>
     <ClCompile Include="test-optional.cpp">
+      <Filter>test</Filter>
+    </ClCompile>
+    <ClCompile Include="test-string_view.cpp">
       <Filter>test</Filter>
     </ClCompile>
   </ItemGroup>
