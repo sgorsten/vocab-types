@@ -14,12 +14,15 @@ Note that as these files are intended to be temporary standins for the actual st
 - [variant.h](/include/variant.h): A standin for the `<variant>` standard library header
 - [any.h](/include/any.h): A standin for the `<any>` standard library header
 - [utility.h](/include/utility.h): Contains the additions to the `<utility>` standard library header required by `std::optional<T>`, `std::variant<T...>`, and `std::any`
+- [string_view.h](/include/string_view.h): A standin for the `<string_view>` standard library header
 
 # Known Gaps
 
 - [ ] get_if (variant)
-- [ ] std::hash (variant)
+- [ ] std::hash (variant / string_view)
 - [ ] forwarding allocators (variant)
+- [ ] find/etc. (string_view)
+- [ ] comparison operators (string view)
 - [ ] noexcept specifications are missing/incomplete
 - [ ] constexpr specifications are missing/incomplete
 - [ ] SFINAE for disabling some overloads based on type traits
