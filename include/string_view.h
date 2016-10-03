@@ -2,6 +2,7 @@
 #define EARLY17_STRING_VIEW
 
 #include <iterator>
+#include <algorithm>
 #include <stdexcept>
 
 #pragma warning(push)
@@ -143,7 +144,51 @@ public:
 
     constexpr void swap(basic_string_view& v) noexcept { swap(_Data, v._Data); swap(_Size, v._Size); }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // copy - http://en.cppreference.com/w/cpp/string/basic_string_view/copy //
+    ///////////////////////////////////////////////////////////////////////////
+
+    size_type copy(CharT* dest, size_type count, size_type pos = 0) const
+    { 
+        auto sub = substr(pos, count);
+        return std::copy(begin(sub), end(sub), dest) - dest;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // substr - http://en.cppreference.com/w/cpp/string/basic_string_view/substr //
+    ///////////////////////////////////////////////////////////////////////////////
+
+    constexpr basic_string_view substr(size_type pos = 0, size_type count = npos ) const
+    {
+        if(pos > size()) throw std::out_of_range{};
+        return {data() + pos, std::min(count, size() - pos)};
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////
+    // compare - http://en.cppreference.com/w/cpp/string/basic_string_view/compare //
+    /////////////////////////////////////////////////////////////////////////////////
+
+    constexpr int compare(basic_string_view v) const noexcept // (1)
+    {
+        auto r = Traits::compare(data(), v.data(), min(size(), v.size()));
+        if(r < 0) return -1;
+        if(r > 0) return 1;
+        if(size() < v.size()) return -1;
+        if(size() > v.size()) return 1;
+        return 0;
+    }
+    constexpr int compare(size_type pos1, size_type count1, basic_string_view v) const noexcept { return substr(pos1, count1).compare(v); } // (2)
+    constexpr int compare(size_type pos1, size_type count1, basic_string_view v, size_type pos2, size_type count2) const noexcept { return substr(pos1, count1).compare(v.substr(pos2, count2)); } // (3)
+    constexpr int compare(const CharT* s) const noexcept { return compare(basic_string_view(s)); } // (4)
+    constexpr int compare(size_type pos1, size_type count1, const CharT* s) const noexcept { return substr(pos1, count1).compare(basic_string_view(s)); } // (5)
+    constexpr int compare(size_type pos1, size_type count1, const CharT* s, size_type count2) const noexcept { return substr(pos1, count1).compare(basic_string_view(s, count2)); } // (6)
+
     // TODO: All find variations
+
+    constexpr size_type find(basic_string_view v, size_type pos = 0) const noexcept; // (1)
+    constexpr size_type find(CharT c, size_type pos = 0) const noexcept { return find(basic_string_view(&c, 1), pos); } // (2)
+    constexpr size_type find(const CharT* s, size_type pos, size_type count) const noexcept { return find(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type find(const CharT* s, size_type pos = 0) const noexcept { return find(basic_string_view(s), pos); } // (4)
 
     ///////////////////////////////////////////////////////////////////////////
     // npos - http://en.cppreference.com/w/cpp/string/basic_string_view/npos //
@@ -157,10 +202,22 @@ using wstring_view = basic_string_view<wchar_t>;
 using u16string_view = basic_string_view<char16_t>;
 using u32string_view = basic_string_view<char32_t>;
 
-// TODO: Comparison operators
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// operator==, !=, <, <=, >, >= - http://en.cppreference.com/w/cpp/string/basic_string_view/operator_cmp //
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class CharT, class Traits>
-std::basic_ostream<CharT, Traits>& operator<< (std::basic_ostream<CharT, Traits>& os, std::basic_string_view<CharT, Traits> v)
+template< class CharT, class Traits > constexpr bool operator==( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) == 0; } // (1)
+template< class CharT, class Traits > constexpr bool operator!=( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) != 0; } // (2)
+template< class CharT, class Traits > constexpr bool operator< ( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) <  0; } // (3)
+template< class CharT, class Traits > constexpr bool operator<=( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) <= 0; } // (4)
+template< class CharT, class Traits > constexpr bool operator> ( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) >  0; } // (5)
+template< class CharT, class Traits > constexpr bool operator>=( basic_string_view <CharT,Traits> lhs, basic_string_view <CharT,Traits> rhs ) noexcept { return lhs.compare(rhs) >= 0; } // (6)
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// operator<< - http://en.cppreference.com/w/cpp/string/basic_string_view/operator_ltlt //
+//////////////////////////////////////////////////////////////////////////////////////////
+
+template<class CharT, class Traits> std::basic_ostream<CharT, Traits>& operator<< (std::basic_ostream<CharT, Traits>& os, std::basic_string_view<CharT, Traits> v)
 {
     for(auto ch : v) os << ch;
     return os;
