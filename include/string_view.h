@@ -67,15 +67,15 @@ public:
     // rbegin - http://en.cppreference.com/w/cpp/string/basic_string_view/rbegin //
     /////////////////////////////////////////////////////////////////////////////
 
-    constexpr const_reverse_iterator rbegin() const noexcept { return cend(); }
-    constexpr const_reverse_iterator rcbegin() const noexcept { return cend(); }
+    constexpr const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator{cend()}; }
+    constexpr const_reverse_iterator rcbegin() const noexcept { return const_reverse_iterator{cend()}; }
 
     ///////////////////////////////////////////////////////////////////////////
     // rend - http://en.cppreference.com/w/cpp/string/basic_string_view/rend //
     ///////////////////////////////////////////////////////////////////////////
 
-    constexpr const_reverse_iterator rend() const noexcept { return cbegin(); }
-    constexpr const_reverse_iterator rcend() const noexcept { return cbegin(); }
+    constexpr const_reverse_iterator rend() const noexcept { return const_reverse_iterator{cbegin()}; }
+    constexpr const_reverse_iterator rcend() const noexcept { return const_reverse_iterator{cbegin()}; }
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // operator[] - http://en.cppreference.com/w/cpp/string/basic_string_view/operator_at //
@@ -183,12 +183,31 @@ public:
     constexpr int compare(size_type pos1, size_type count1, const CharT* s) const noexcept { return substr(pos1, count1).compare(basic_string_view(s)); } // (5)
     constexpr int compare(size_type pos1, size_type count1, const CharT* s, size_type count2) const noexcept { return substr(pos1, count1).compare(basic_string_view(s, count2)); } // (6)
 
-    // TODO: All find variations
+    ///////////////////////////////////////////////////////////////////////////
+    // find - http://en.cppreference.com/w/cpp/string/basic_string_view/find //
+    ///////////////////////////////////////////////////////////////////////////
 
-    constexpr size_type find(basic_string_view v, size_type pos = 0) const noexcept; // (1)
+    constexpr size_type find(basic_string_view v, size_type pos = 0) const noexcept // (1)
+    { 
+        return [this](auto it) { return it == end() ? npos : it - begin(); }(std::search(begin() + pos, end(), v.begin(), v.end())); 
+    }
     constexpr size_type find(CharT c, size_type pos = 0) const noexcept { return find(basic_string_view(&c, 1), pos); } // (2)
     constexpr size_type find(const CharT* s, size_type pos, size_type count) const noexcept { return find(basic_string_view(s, count), pos); } // (3)
     constexpr size_type find(const CharT* s, size_type pos = 0) const noexcept { return find(basic_string_view(s), pos); } // (4)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // rfind - http://en.cppreference.com/w/cpp/string/basic_string_view/rfind //
+    /////////////////////////////////////////////////////////////////////////////
+
+    constexpr size_type rfind(basic_string_view v, size_type pos = npos) const noexcept // (1)
+    {
+        return [this,v](auto it) { return it == rend() ? npos : size() - (it - rbegin()) - v.size(); }(std::search(rend() - std::min(pos, size()), rend(), v.rbegin(), v.rend()));
+    }	
+    constexpr size_type rfind(CharT c, size_type pos = npos) const noexcept { return rfind(basic_string_view(&c, 1), pos); } // (2)
+    constexpr size_type rfind(const CharT* s, size_type pos, size_type count) const noexcept { return rfind(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type rfind(const CharT* s, size_type pos = npos) const noexcept { return rfind(basic_string_view(s), pos); } // (4)
+
+    // TODO: find_first_of, etc.
 
     ///////////////////////////////////////////////////////////////////////////
     // npos - http://en.cppreference.com/w/cpp/string/basic_string_view/npos //
