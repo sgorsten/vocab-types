@@ -14,8 +14,7 @@ namespace std {
 // basic_string_view - http://en.cppreference.com/w/cpp/string/basic_string_view //
 ///////////////////////////////////////////////////////////////////////////////////
 
-template<class CharT, class Traits = std::char_traits<CharT>> 
-class basic_string_view
+template<class CharT, class Traits = std::char_traits<CharT>> class basic_string_view
 {
 public:
     using traits_type =	Traits;
@@ -207,7 +206,41 @@ public:
     constexpr size_type rfind(const CharT* s, size_type pos, size_type count) const noexcept { return rfind(basic_string_view(s, count), pos); } // (3)
     constexpr size_type rfind(const CharT* s, size_type pos = npos) const noexcept { return rfind(basic_string_view(s), pos); } // (4)
 
-    // TODO: find_first_of, etc.
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    // find_first_of - http://en.cppreference.com/w/cpp/string/basic_string_view/find_first_of //
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    
+    constexpr size_type find_first_of(basic_string_view v, size_type pos = 0) const; // (1) (TODO)
+    constexpr size_type find_first_of(CharT c, size_type pos = 0) const { return find_first_of(basic_string_view(&c, 1), pos); } // (2)
+    constexpr size_type find_first_of(const CharT* s, size_type pos, size_type count) const { return find_first_of(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type find_first_of(const CharT* s, size_type pos = 0) const { return find_first_of(basic_string_view(s), pos); } // (4)
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // find_last_of - http://en.cppreference.com/w/cpp/string/basic_string_view/find_last_of //
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr size_type find_last_of(basic_string_view v, size_type pos = npos) const; // (1) (TODO)
+    constexpr size_type find_last_of(CharT c, size_type pos = npos) const { return find_last_of(basic_string_view(&c, 1), pos); } // (2)
+    constexpr size_type find_last_of(const CharT* s, size_type pos, size_type count) const { return find_last_of(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type find_last_of(const CharT* s, size_type pos = npos) const { return find_last_of(basic_string_view(s), pos); } // (4)
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    // find_first_not_of - http://en.cppreference.com/w/cpp/string/basic_string_view/find_first_not_of //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr size_type find_first_not_of(basic_string_view v, size_type pos = 0) const; // (1) (TODO)
+    constexpr size_type find_first_not_of(CharT c, size_type pos = 0) const { return find_first_not_of(basic_string_view(&c, 1), pos); } // (2)
+    constexpr size_type find_first_not_of(const CharT* s, size_type pos, size_type count) const { return find_first_not_of(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type find_first_not_of(const CharT* s, size_type pos = 0) const { return find_first_not_of(basic_string_view(s), pos); } // (4)
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+    // find_last_not_of - http://en.cppreference.com/w/cpp/string/basic_string_view/find_last_not_of // 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    constexpr size_type find_last_not_of(basic_string_view v, size_type pos = npos) const; // (1) (TODO)
+    constexpr size_type find_last_not_of(CharT c, size_type pos = npos) const { return find_last_not_of(basic_string_view(&c, 1), pos); }
+    constexpr size_type find_last_not_of(const CharT* s, size_type pos, size_type count) const { return find_last_not_of(basic_string_view(s, count), pos); } // (3)
+    constexpr size_type find_last_not_of(const CharT* s, size_type pos = npos) const { return find_last_not_of(basic_string_view(s), pos); } // (4)
 
     ///////////////////////////////////////////////////////////////////////////
     // npos - http://en.cppreference.com/w/cpp/string/basic_string_view/npos //
