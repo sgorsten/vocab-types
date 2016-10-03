@@ -20,7 +20,6 @@ Note that as these files are intended to be temporary standins for the actual st
 
 - [ ] std::hash (variant / string_view)
 - [ ] forwarding allocators (variant)
-- [ ] find_first_of/etc. (string_view)
 - [ ] noexcept specifications are missing/incomplete
 - [ ] constexpr specifications are missing/incomplete
 - [ ] SFINAE for disabling some overloads based on type traits
