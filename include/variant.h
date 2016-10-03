@@ -176,8 +176,8 @@ public:
         }
     }
 
-    template<size_t I> variant_alternative_t<I, variant> & _Unchecked_get() { return reinterpret_cast<variant_alternative_t<I, variant> &>(_Storage); }
-    template<size_t I> variant_alternative_t<I, variant> const & _Unchecked_get() const { return reinterpret_cast<variant_alternative_t<I, variant> const &>(_Storage); }
+    template<size_t I> variant_alternative_t<I, variant> & _Unchecked_get() noexcept { return reinterpret_cast<variant_alternative_t<I, variant> &>(_Storage); }
+    template<size_t I> variant_alternative_t<I, variant> const & _Unchecked_get() const noexcept { return reinterpret_cast<variant_alternative_t<I, variant> const &>(_Storage); }
 private:
     void _Reset()
     {
@@ -244,6 +244,15 @@ template<class T, class... Types> constexpr       T &  get(      variant<Types..
 template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<index_of<T, Types...>::value>(std::move(v)); }
 template<class T, class... Types> constexpr const T &  get(const variant<Types...> &  v) { return get<index_of<T, Types...>::value>(v); }
 template<class T, class... Types> constexpr const T && get(const variant<Types...> && v) { return get<index_of<T, Types...>::value>(std::move(v)); }
+
+//////////////////////////////////////////////////////////////////////
+// get_if - http://en.cppreference.com/w/cpp/utility/variant/get_if //
+//////////////////////////////////////////////////////////////////////
+
+template<std::size_t I, class... Types> constexpr std::add_pointer_t<std::variant_alternative_t<I, std::variant<Types...>>> get_if(std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &pv->_Unchecked_get<I>() : nullptr; }
+template<std::size_t I, class... Types> constexpr std::add_pointer_t<const std::variant_alternative_t<I, variant<Types...>>> get_if(const std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &pv->_Unchecked_get<I>() : nullptr; }
+template<class T, class... Types> constexpr std::add_pointer_t<T> get_if(variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
+template<class T, class... Types> constexpr std::add_pointer_t<const T> get_if(const variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // operator==, !=, <, <=, >, >= - http://en.cppreference.com/w/cpp/utility/variant/operator_cmp //
