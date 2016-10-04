@@ -12,13 +12,13 @@ addons:
     packages:
     - gcc-6
     - g++-6
-    - clang-3.7
+    - clang-3.9
 
 install:
   # /usr/bin/gcc is 4.6 always, but gcc-X.Y is available.
   - if [ "$CXX" = "g++" ]; then export CXX="g++-6" CC="gcc-6"; fi
   # /usr/bin/clang is 3.4, lets override with modern one.
-  - if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+  - if [ "$CXX" = "clang++" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CXX="clang++-3.9" CC="clang-3.9"; fi
   - echo ${CXX}
   - ${CXX} --version
   - ${CXX} -v
