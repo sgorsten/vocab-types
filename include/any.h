@@ -25,8 +25,8 @@ class any
     };
     std::unique_ptr<holder_base> _Value;
 public:
-    template<class T> T * _Get() noexcept { return type() == typeid(T) ? reinterpret_cast<T *>(_Value->get()) : nullptr; } 
-    template<class T> const T * _Get() const noexcept { return type() == typeid(T) ? reinterpret_cast<const T *>(_Value->get()) : nullptr; }
+    template<class T> T * _Get() noexcept { return _Value && type() == typeid(T) ? reinterpret_cast<T *>(_Value->get()) : nullptr; } 
+    template<class T> const T * _Get() const noexcept { return _Value && type() == typeid(T) ? reinterpret_cast<const T *>(_Value->get()) : nullptr; }
 
     //////////////////////////////////////////////////////////////////////
     // (constructor) - http://en.cppreference.com/w/cpp/utility/any/any //

@@ -16,7 +16,7 @@ constexpr nullopt_t nullopt {0};
 // bad_optional_access - http://en.cppreference.com/w/cpp/utility/optional/bad_optional_access //
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-class bad_optional_access : public std::exception { public: bad_optional_access() : std::exception("bad_optional_access") {} };
+class bad_optional_access : public std::exception { public: bad_optional_access() : std::exception() {} const char * what() const noexcept override { return "bad_optional_access"; } };
 
 template<class T> class optional
 {
@@ -55,12 +55,12 @@ public:
     // operator->,* - http://en.cppreference.com/w/cpp/utility/optional/operator* //
     ////////////////////////////////////////////////////////////////////////////////
 
-    constexpr const T* operator->() const { return reinterpret_cast<const T *>(&_Value._Unchecked_get<1>()); } // (1)
-    T* operator->() { return reinterpret_cast<T *>(&_Value._Unchecked_get<1>()); } // (1)
-    constexpr const T& operator*() const& { return reinterpret_cast<const T &>(_Value._Unchecked_get<1>()); } // (2)
-    T& operator*() & { return reinterpret_cast<T &>(_Value._Unchecked_get<1>()); } // (2)
-    constexpr const T&& operator*() const&& { return reinterpret_cast<const T &&>(_Value._Unchecked_get<1>()); } // (2)
-    T&& operator*() && { return reinterpret_cast<T &&>(_Value._Unchecked_get<1>()); } // (2)
+    constexpr const T* operator->() const { return reinterpret_cast<const T *>(&_Value._Storage); } // (1)
+    T* operator->() { return reinterpret_cast<T *>(&_Value._Storage); } // (1)
+    constexpr const T& operator*() const& { return reinterpret_cast<const T &>(_Value._Storage); } // (2)
+    T& operator*() & { return reinterpret_cast<T &>(_Value._Storage); } // (2)
+    constexpr const T&& operator*() const&& { return reinterpret_cast<const T &&>(_Value._Storage); } // (2)
+    T&& operator*() && { return reinterpret_cast<T &&>(_Value._Storage); } // (2)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // operator bool, has_value - http://en.cppreference.com/w/cpp/utility/optional/operator_bool //
@@ -101,8 +101,8 @@ public:
     // emplace - http://en.cppreference.com/w/cpp/utility/optional/emplace //
     /////////////////////////////////////////////////////////////////////////
 
-    template<class... Args> void emplace(Args &&... args) { _Value.emplace(std::in_place_index_t<1>{}, std::forward<Args>(args)...); }
-    template<class U, class... Args> void emplace(initializer_list<U> ilist, Args&&... args) { _Value.emplace(std::in_place_index_t<1>{}, ilist, std::forward<Args>(args)...); }
+    template<class... Args> void emplace(Args &&... args) { _Value.emplace(in_place<1>, std::forward<Args>(args)...); }
+    template<class U, class... Args> void emplace(initializer_list<U> ilist, Args&&... args) { _Value.emplace(in_place<1>, ilist, std::forward<Args>(args)...); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +154,7 @@ template<class T, class U, class... Args> constexpr std::optional<T> make_option
 // swap - http://en.cppreference.com/w/cpp/utility/optional/swap2 //
 ////////////////////////////////////////////////////////////////////
 
-template<class T> void swap(optional<T>& lhs, optional<T>& rhs) noexcept(lhs.swap(rhs)) { lhs.swap(rhs); }
+template<class T> void swap(optional<T>& lhs, optional<T>& rhs) { lhs.swap(rhs); }
 
 /////////////////////////////////////////////////////////////////////////////
 // hash<optional> - http://en.cppreference.com/w/cpp/utility/optional/hash //

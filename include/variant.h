@@ -11,29 +11,6 @@ namespace std {
 // Forward declare types
 template<class... Types> class variant;
 
-namespace detail {
-
-// Determine which constructor would be selected based on a type
-template<class... Types> struct constructor_selection_helper {};
-template<> struct constructor_selection_helper<> { void f(); };
-template<class First, class... Rest> struct constructor_selection_helper<First, Rest...> : constructor_selection_helper<Rest...> { First f(First); using constructor_selection_helper<Rest...>::f; };
-template<class... Types, class T> auto construct(T && t) { return constructor_selection_helper<Types...>{}.f(std::forward<T>(t)); }
-
-// Determine the index of a type in a type list
-template<class T, class... Types> struct index_of;
-template<class T, class... Rest> struct index_of<T, T, Rest...> { constexpr static size_t value = 0; };
-template<class T, class First, class... Rest> struct index_of<T, First, Rest...> { constexpr static size_t value = 1 + index_of<T, Rest...>::value; };
-
-template<class Visitor, class Variant> auto visit(Variant && var, index_t<0>, Visitor && vis) { return var.index() == 0 ? vis(std::get<0>(var)) : throw std::bad_variant_access{}; }
-template<class Visitor, class Variant, size_t I> auto visit(Variant && var, index_t<I>, Visitor && vis) { return var.index() == I ? vis(std::get<I>(var)) : visit(std::forward<Variant>(var), index_t<I-1>{}, std::forward<Visitor>(vis)); }
-
-template<class Visitor, class Left, class Right> auto visit_same(Left && l, Right && r, index_t<0>, Visitor && vis) { return r.index() == 0 ? vis(std::get<0>(std::forward<Left>(l)), std::get<0>(std::forward<Right>(r))) : throw std::bad_variant_access{}; }
-template<class Visitor, class Left, class Right, size_t I> auto visit_same(Left && l, Right && r, index_t<I>, Visitor && vis) { return r.index() == I ? vis(std::get<I>(std::forward<Left>(l)), std::get<I>(std::forward<Right>(r))) : visit_same(std::forward<Left>(l), std::forward<Right>(r), index_t<I-1>{}, std::forward<Visitor>(vis)); }
-template<class Visitor, class Left, class Right> auto visit_same(Left && l, Right && r, Visitor && vis) { return visit_same(std::forward<Left>(l), std::forward<Right>(r), index_t<variant_size<std::remove_reference_t<Right>>::value-1>{}, std::forward<Visitor>(vis)); }
-template<class T> void invoke_destructor(T & x) { x.~T(); }
-
-} // namespace std::detail
-
 ////////////////////////////////////////////////////////////////////////////
 // monostate - http://en.cppreference.com/w/cpp/utility/variant/monostate //
 ////////////////////////////////////////////////////////////////////////////
@@ -50,7 +27,7 @@ constexpr bool operator!=(monostate, monostate) noexcept { return false; }
 // bad_variant_access - http://en.cppreference.com/w/cpp/utility/variant/bad_variant_access //
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-class bad_variant_access : public std::exception { public: bad_variant_access() : std::exception("bad_variant_access") {} };
+class bad_variant_access : public std::exception { public: bad_variant_access() : std::exception() {} const char * what() const noexcept override { return "bad_variant_access"; } };
 
 //////////////////////////////////////////////////////////////////////////////////
 // variant_size - http://en.cppreference.com/w/cpp/utility/variant/variant_size //
@@ -79,6 +56,35 @@ template<size_t I, class T> using variant_alternative_t = typename variant_alter
 //////////////////////////////////////////////////////////////////////////////////
 
 constexpr std::size_t variant_npos = -1;
+
+// Forward declare std::get<I> so that visit(...) can work properly
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> & get(variant<Types...> & v);
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> && get(variant<Types...> && v);
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v);
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const && get(const variant<Types...> && v);
+
+namespace detail {
+
+// Determine which constructor would be selected based on a type
+template<class... Types> struct constructor_selection_helper {};
+template<> struct constructor_selection_helper<> { void f(); };
+template<class First, class... Rest> struct constructor_selection_helper<First, Rest...> : constructor_selection_helper<Rest...> { First f(First); using constructor_selection_helper<Rest...>::f; };
+template<class... Types, class T> auto construct(T && t) { return constructor_selection_helper<Types...>{}.f(std::forward<T>(t)); }
+
+// Determine the index of a type in a type list
+template<class T, class... Types> struct index_of;
+template<class T, class... Rest> struct index_of<T, T, Rest...> { constexpr static size_t value = 0; };
+template<class T, class First, class... Rest> struct index_of<T, First, Rest...> { constexpr static size_t value = 1 + index_of<T, Rest...>::value; };
+
+template<class Visitor, class Variant> auto visit(Variant && var, index_t<0>, Visitor && vis) { return var.index() == 0 ? vis(std::get<0>(var)) : throw std::bad_variant_access{}; }
+template<class Visitor, class Variant, size_t I> auto visit(Variant && var, index_t<I>, Visitor && vis) { return var.index() == I ? vis(std::get<I>(var)) : visit(std::forward<Variant>(var), index_t<I-1>{}, std::forward<Visitor>(vis)); }
+
+template<class Visitor, class Left, class Right> auto visit_same(Left && l, Right && r, index_t<0>, Visitor && vis) { return r.index() == 0 ? vis(std::get<0>(std::forward<Left>(l)), std::get<0>(std::forward<Right>(r))) : throw std::bad_variant_access{}; }
+template<class Visitor, class Left, class Right, size_t I> auto visit_same(Left && l, Right && r, index_t<I>, Visitor && vis) { return r.index() == I ? vis(std::get<I>(std::forward<Left>(l)), std::get<I>(std::forward<Right>(r))) : visit_same(std::forward<Left>(l), std::forward<Right>(r), index_t<I-1>{}, std::forward<Visitor>(vis)); }
+template<class Visitor, class Left, class Right> auto visit_same(Left && l, Right && r, Visitor && vis) { return visit_same(std::forward<Left>(l), std::forward<Right>(r), index_t<variant_size<std::remove_reference_t<Right>>::value-1>{}, std::forward<Visitor>(vis)); }
+template<class T> void invoke_destructor(T & x) { x.~T(); }
+
+} // namespace std::detail
 
 ////////////////////////////////////////////////////////////////
 // variant - http://en.cppreference.com/w/cpp/utility/variant //
@@ -131,7 +137,7 @@ public:
     {
         using U = decltype(detail::construct<Types...>(std::forward<T>(t)));
         constexpr size_t I = detail::index_of<U, Types...>::value;
-        if(_Index == I) _Unchecked_get<I>() = std::forward<T>(t);
+        if(_Index == I) reinterpret_cast<variant_alternative_t<I, variant<Types...>> &>(_Storage) = std::forward<T>(t);
         else emplace<I>(std::forward<T>(t));
         return *this;
     }
@@ -171,14 +177,14 @@ public:
         else
         {
             variant tmp {std::move(*this)};
-            *this = std::move(r);
-            r = std::move(tmp);
+            *this = std::move(rhs);
+            rhs = std::move(tmp);
         }
     }
 
-    template<size_t I> variant_alternative_t<I, variant> & _Unchecked_get() noexcept { return reinterpret_cast<variant_alternative_t<I, variant> &>(_Storage); }
-    template<size_t I> variant_alternative_t<I, variant> const & _Unchecked_get() const noexcept { return reinterpret_cast<variant_alternative_t<I, variant> const &>(_Storage); }
-private:
+    //template<size_t I> variant_alternative_t<I, variant> & _Unchecked_get() noexcept { return reinterpret_cast<variant_alternative_t<I, variant> &>(_Storage); }
+    //template<size_t I> variant_alternative_t<I, variant> const & _Unchecked_get() const noexcept { return reinterpret_cast<variant_alternative_t<I, variant> const &>(_Storage); }
+//private:
     void _Reset()
     {
         if(_Index != variant_npos)
@@ -221,7 +227,7 @@ template<class Visitor, class First, class... Rest> auto visit(Visitor && vis, F
     { 
         return visit([&](auto &&... args) 
         { 
-            return std::invoke(vis, x, args...); 
+            return vis(x, args...); 
         }, rest...);
     });
 }
@@ -230,27 +236,27 @@ template<class Visitor, class First, class... Rest> auto visit(Visitor && vis, F
 // holds_alternative - http://en.cppreference.com/w/cpp/utility/variant/holds_alternative //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class T, class... Types> constexpr bool holds_alternative(const variant<Types...> & v) { return index_of<T, Types...>::value == v.index(); }
+template<class T, class... Types> constexpr bool holds_alternative(const variant<Types...> & v) { return detail::index_of<T, Types...>::value == v.index(); }
 
 ////////////////////////////////////////////////////////////////
 // get - http://en.cppreference.com/w/cpp/utility/variant/get //
 ////////////////////////////////////////////////////////////////
 
-template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> & get(variant<Types...> & v) { if(v.index() == I) return v._Unchecked_get<I>(); throw bad_variant_access{}; }
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> & get(variant<Types...> & v) { if(v.index() == I) return reinterpret_cast<variant_alternative_t<I, variant<Types...>> &>(v._Storage); throw bad_variant_access{}; }
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> && get(variant<Types...> && v) { return std::move(get<I>(v)); }                        
-template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v) { if(v.index() == I) return v._Unchecked_get<I>(); throw bad_variant_access{}; }
+template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v) { if(v.index() == I) return reinterpret_cast<variant_alternative_t<I, variant<Types...>> const &>(v._Storage); throw bad_variant_access{}; }
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const && get(const variant<Types...> && v) { return std::move(get<I>(v)); }
-template<class T, class... Types> constexpr       T &  get(      variant<Types...> &  v) { return get<index_of<T, Types...>::value>(v); }
-template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<index_of<T, Types...>::value>(std::move(v)); }
-template<class T, class... Types> constexpr const T &  get(const variant<Types...> &  v) { return get<index_of<T, Types...>::value>(v); }
-template<class T, class... Types> constexpr const T && get(const variant<Types...> && v) { return get<index_of<T, Types...>::value>(std::move(v)); }
+template<class T, class... Types> constexpr       T &  get(      variant<Types...> &  v) { return get<detail::index_of<T, Types...>::value>(v); }
+template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<detail::index_of<T, Types...>::value>(std::move(v)); }
+template<class T, class... Types> constexpr const T &  get(const variant<Types...> &  v) { return get<detail::index_of<T, Types...>::value>(v); }
+template<class T, class... Types> constexpr const T && get(const variant<Types...> && v) { return get<detail::index_of<T, Types...>::value>(std::move(v)); }
 
 //////////////////////////////////////////////////////////////////////
 // get_if - http://en.cppreference.com/w/cpp/utility/variant/get_if //
 //////////////////////////////////////////////////////////////////////
 
-template<std::size_t I, class... Types> constexpr std::add_pointer_t<std::variant_alternative_t<I, std::variant<Types...>>> get_if(std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &pv->_Unchecked_get<I>() : nullptr; }
-template<std::size_t I, class... Types> constexpr std::add_pointer_t<const std::variant_alternative_t<I, variant<Types...>>> get_if(const std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &pv->_Unchecked_get<I>() : nullptr; }
+template<std::size_t I, class... Types> constexpr std::add_pointer_t<std::variant_alternative_t<I, std::variant<Types...>>> get_if(std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &std::get<I>(*pv) : nullptr; }
+template<std::size_t I, class... Types> constexpr std::add_pointer_t<const std::variant_alternative_t<I, variant<Types...>>> get_if(const std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &std::get<I>(*pv) : nullptr; }
 template<class T, class... Types> constexpr std::add_pointer_t<T> get_if(variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
 template<class T, class... Types> constexpr std::add_pointer_t<const T> get_if(const variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
 

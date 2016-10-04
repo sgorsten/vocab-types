@@ -1,5 +1,6 @@
 #include "variant.h"
 #include "doctest.h"
+#include <typeinfo>
 #include <sstream>
 #include <vector>
 #include <set>
