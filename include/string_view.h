@@ -172,12 +172,14 @@ public:
 
     constexpr int compare(basic_string_view v) const noexcept // (1)
     {
-        auto r = Traits::compare(data(), v.data(), min(size(), v.size()));
-        if(r < 0) return -1;
-        if(r > 0) return 1;
-        if(size() < v.size()) return -1;
-        if(size() > v.size()) return 1;
-        return 0;
+        return [this,v](int r)
+        {
+            if(r < 0) return -1;
+            if(r > 0) return 1;
+            if(size() < v.size()) return -1;
+            if(size() > v.size()) return 1;
+            return 0;        
+        }(Traits::compare(data(), v.data(), min(size(), v.size())));
     }
     constexpr int compare(size_type pos1, size_type count1, basic_string_view v) const noexcept { return substr(pos1, count1).compare(v); } // (2)
     constexpr int compare(size_type pos1, size_type count1, basic_string_view v, size_type pos2, size_type count2) const noexcept { return substr(pos1, count1).compare(v.substr(pos2, count2)); } // (3)

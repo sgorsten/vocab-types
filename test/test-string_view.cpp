@@ -1,5 +1,7 @@
 #include "string_view.h"
 #include "doctest.h"
+#include <unordered_set>
+#include <set>
 
 TEST_CASE("std::string_view")
 {
@@ -40,4 +42,16 @@ TEST_CASE("find_first_of(...), etc.")
     CHECK(a.find_last_not_of("test ") == 8); // finds 'a'
     CHECK(a.find_last_not_of("test a") == 5); // finds 'i'
     CHECK(a.find_last_not_of("tis ae") == 1); // finds 'h'
+}
+
+TEST_CASE("string_view can be used as key type in ordered containers")
+{
+    std::set<std::string_view> a {"what", "a", "wonderful", "day", "it", "is", "today"};
+    std::multiset<std::wstring_view> b {L"it", L"would", L"suck", L"if", L"something", L"bad", L"happened"};
+}
+
+TEST_CASE("string_view can be used as key type in unordered containers")
+{
+    std::unordered_set<std::string_view> a {"what", "a", "wonderful", "day", "it", "is", "today"};
+    std::unordered_multiset<std::wstring_view> b {L"it", L"would", L"suck", L"if", L"something", L"bad", L"happened"};
 }
