@@ -1,6 +1,10 @@
 #include "optional.h"
 #include "doctest.h"
 #include <string>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 TEST_CASE("construct null std::optional<T>")
 {
@@ -34,4 +38,20 @@ TEST_CASE("construct std::optional<T> with a value")
     CHECK(b.value() == s);
     CHECK(b == s);
     CHECK(s == b);
+}
+
+TEST_CASE("optional can be used as key type in ordered containers")
+{
+    std::map<std::optional<int>, double> a {{5, 1.1}, {std::nullopt, 2.3}, {2, 3.5}};
+    std::set<std::optional<std::string>> b {std::string{"Hello"}, std::nullopt, std::string{"world!"}};
+    std::multimap<std::optional<bool>, float> c {{true, 1.1f}, {false, 2.3f}, {std::nullopt, 3.5f}, {false, 4.8f}};
+    std::multiset<std::optional<float>> d {1.1f, 2.3f, std::nullopt, 2.3f, std::nullopt, 4.8f};
+}
+
+TEST_CASE("optional can be used as key type in unordered containers")
+{
+    std::unordered_map<std::optional<int>, double> a {{5, 1.1}, {std::nullopt, 2.3}, {2, 3.5}};
+    std::unordered_set<std::optional<std::string>> b {std::string{"Hello"}, std::nullopt, std::string{"world!"}};
+    std::unordered_multimap<std::optional<bool>, float> c {{true, 1.1f}, {false, 2.3f}, {std::nullopt, 3.5f}, {false, 4.8f}};
+    std::unordered_multiset<std::optional<float>> d {1.1f, 2.3f, std::nullopt, 2.3f, std::nullopt, 4.8f};
 }

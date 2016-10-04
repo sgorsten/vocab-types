@@ -55,12 +55,12 @@ public:
     // operator->,* - http://en.cppreference.com/w/cpp/utility/optional/operator* //
     ////////////////////////////////////////////////////////////////////////////////
 
-    constexpr const T* operator->() const { return reinterpret_cast<const T *>(&_Value._Storage); } // (1)
-    T* operator->() { return reinterpret_cast<T *>(&_Value._Storage); } // (1)
-    constexpr const T& operator*() const& { return reinterpret_cast<const T &>(_Value._Storage); } // (2)
-    T& operator*() & { return reinterpret_cast<T &>(_Value._Storage); } // (2)
-    constexpr const T&& operator*() const&& { return reinterpret_cast<const T &&>(_Value._Storage); } // (2)
-    T&& operator*() && { return reinterpret_cast<T &&>(_Value._Storage); } // (2)
+    constexpr const T* operator->() const { return reinterpret_cast<const T *>(&_Value._Unchecked_get<1>()); } // (1)
+    T* operator->() { return reinterpret_cast<T *>(&_Value._Unchecked_get<1>()); } // (1)
+    constexpr const T& operator*() const& { return reinterpret_cast<const T &>(_Value._Unchecked_get<1>()); } // (2)
+    T& operator*() & { return reinterpret_cast<T &>(_Value._Unchecked_get<1>()); } // (2)
+    constexpr const T&& operator*() const&& { return reinterpret_cast<const T &&>(_Value._Unchecked_get<1>()); } // (2)
+    T&& operator*() && { return reinterpret_cast<T &&>(_Value._Unchecked_get<1>()); } // (2)
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // operator bool, has_value - http://en.cppreference.com/w/cpp/utility/optional/operator_bool //
@@ -162,7 +162,7 @@ template<class T> void swap(optional<T>& lhs, optional<T>& rhs) noexcept(lhs.swa
 
 template<class T> struct hash<std::optional<T>>
 {
-    size_t operator() (const std::optional<T> & key) noexcept { return key ? std::hash<T>{}(*key) : 0; }
+    size_t operator() (const std::optional<T> & key) const noexcept { return key ? std::hash<T>{}(*key) : 0; }
 };
 
 } // namespace std

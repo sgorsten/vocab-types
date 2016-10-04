@@ -278,6 +278,7 @@ template<class CharT, class Traits> std::basic_ostream<CharT, Traits>& operator<
 
 namespace detail
 {
+    // NOTE: This is a painfully bad hashing algorithm, but I don't want to risk inadvertantly adding someone else's copyrighted code to this project
     template<class T> size_t hash_string_view(const std::basic_string_view<T> & view) noexcept
     {
         std::hash<T> h;
@@ -287,10 +288,10 @@ namespace detail
     }
 }
 
-template<> struct hash<std::string_view> { size_t operator() (const std::string_view & key) noexcept { return detail::hash_string_view(key); } };
-template<> struct hash<std::wstring_view> { size_t operator() (const std::wstring_view & key) noexcept { return detail::hash_string_view(key); } };
-template<> struct hash<std::u16string_view> { size_t operator() (const std::u16string_view & key) noexcept { return detail::hash_string_view(key); } };
-template<> struct hash<std::u32string_view> { size_t operator() (const std::u32string_view & key) noexcept { return detail::hash_string_view(key); } };
+template<> struct hash<std::string_view> { size_t operator() (const std::string_view & key) const noexcept { return detail::hash_string_view(key); } };
+template<> struct hash<std::wstring_view> { size_t operator() (const std::wstring_view & key) const noexcept { return detail::hash_string_view(key); } };
+template<> struct hash<std::u16string_view> { size_t operator() (const std::u16string_view & key) const noexcept { return detail::hash_string_view(key); } };
+template<> struct hash<std::u32string_view> { size_t operator() (const std::u32string_view & key) const noexcept { return detail::hash_string_view(key); } };
 
 } // namespace std
 

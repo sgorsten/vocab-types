@@ -315,7 +315,7 @@ template<class... Types> void swap(variant<Types...>& lhs, variant<Types...>& rh
 
 template<class... Types> struct hash<std::variant<Types...>>
 {
-    size_t operator() (const std::variant<Types...> & key) 
+    size_t operator() (const std::variant<Types...> & key) const
     {
         return key.valueless_by_exception() ? 0 : key.index() ^ std::visit([](const auto & value) noexcept { return std::hash<decltype(value)>{}(value); }, key);
     }
