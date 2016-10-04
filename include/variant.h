@@ -217,9 +217,9 @@ private:
 template<class Visitor> auto visit(Visitor && vis) { return vis(); }
 template<class Visitor, class First, class... Rest> auto visit(Visitor && vis, First && first, Rest &&... rest)
 { 
-    detail::visit(first, detail::index_t<std::variant_size<std::remove_reference_t<First>>::value-1>{}, [&](auto && x) 
+    return detail::visit(first, detail::index_t<std::variant_size<std::remove_reference_t<First>>::value-1>{}, [&](auto && x) 
     { 
-        visit([&](auto &&... args) 
+        return visit([&](auto &&... args) 
         { 
             return std::invoke(vis, x, args...); 
         }, rest...);
@@ -317,7 +317,7 @@ template<class... Types> struct hash<std::variant<Types...>>
 {
     size_t operator() (const std::variant<Types...> & key) const
     {
-        return key.valueless_by_exception() ? 0 : key.index() ^ std::visit([](const auto & value) noexcept { return std::hash<decltype(value)>{}(value); }, key);
+        return key.valueless_by_exception() ? 0 : key.index() ^ std::visit([](const auto & value) noexcept { return std::hash<std::remove_const_t<std::remove_reference_t<decltype(value)>>>{}(value); }, key);
     }
 };
 

@@ -2,6 +2,8 @@
 #include "doctest.h"
 #include <sstream>
 #include <vector>
+#include <set>
+#include <unordered_set>
 
 TEST_CASE("std::variant<T...> traits")
 {
@@ -198,4 +200,16 @@ TEST_CASE("visit variant")
     CHECK(std::get<0>(a) == 5 + 'A');
     CHECK(std::get<1>(b) == 3.14 + 'A');
     CHECK(std::get<2>(c) == "fooA");
+}
+
+TEST_CASE("variant can be used as key type in ordered containers")
+{
+    std::set<std::variant<int, bool, double, std::string>> a {12, std::string{"Hello"}, false, 3.5, std::string{"world!"}, true, 45, 7.7};
+    std::multiset<std::variant<int, bool, double, std::string>> b {12, std::string{"Hello"}, false, 3.5, std::string{"Hello"}, true, 12, 7.7};
+}
+
+TEST_CASE("optional can be used as key type in unordered containers")
+{
+    std::unordered_set<std::variant<int, bool, double, std::string>> a {12, std::string{"Hello"}, false, 3.5, std::string{"world!"}, true, 45, 7.7};
+    std::unordered_multiset<std::variant<int, bool, double, std::string>> b {12, std::string{"Hello"}, false, 3.5, std::string{"Hello"}, true, 12, 7.7};
 }
