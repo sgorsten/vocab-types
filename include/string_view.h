@@ -245,8 +245,10 @@ public:
     // npos - http://en.cppreference.com/w/cpp/string/basic_string_view/npos //
     ///////////////////////////////////////////////////////////////////////////
 
-    static constexpr size_type npos = size_type(-1);
+    static constexpr const size_type npos = size_type(-1);
 };
+
+template<class CharT, class Traits> const size_t std::basic_string_view<CharT, Traits>::npos;
 
 using string_view =	basic_string_view<char>;
 using wstring_view = basic_string_view<wchar_t>;
