@@ -89,7 +89,7 @@ public:
     // at - http://en.cppreference.com/w/cpp/string/basic_string_view/at //
     ///////////////////////////////////////////////////////////////////////
 
-    constexpr const_reference at(size_type pos) const { if(pos >= _Size) throw std::out_of_range{}; return _Data[pos]; }
+    constexpr const_reference at(size_type pos) const { if(pos >= _Size) throw std::out_of_range{"bad pos"}; return _Data[pos]; }
 
     /////////////////////////////////////////////////////////////////////////////
     // front - http://en.cppreference.com/w/cpp/string/basic_string_view/front //
@@ -162,7 +162,7 @@ public:
 
     constexpr basic_string_view substr(size_type pos = 0, size_type count = npos ) const
     {
-        if(pos > size()) throw std::out_of_range{};
+        if(pos > size()) throw std::out_of_range{"bad pos"};
         return {data() + pos, std::min(count, size() - pos)};
     }
 
