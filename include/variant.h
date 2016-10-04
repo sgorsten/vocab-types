@@ -309,6 +309,18 @@ template<class... Types> constexpr bool operator>=(const variant<Types...>& v, c
 
 template<class... Types> void swap(variant<Types...>& lhs, variant<Types...>& rhs) { lhs.swap(rhs); }
 
+///////////////////////////////////////////////////////////////////////////
+// hash<variant> - http://en.cppreference.com/w/cpp/utility/variant/hash //
+///////////////////////////////////////////////////////////////////////////
+
+template<class... Types> struct hash<std::variant<Types...>>
+{
+    size_t operator() (const std::variant<Types...> & key) 
+    {
+        return key.valueless_by_exception() ? 0 : key.index() ^ std::visit([](const auto & value) noexcept { return std::hash<decltype(value)>{}(value); }, key);
+    }
+};
+
 } // namespace std
 
 #endif

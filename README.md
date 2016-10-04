@@ -18,7 +18,6 @@ Note that as these files are intended to be temporary standins for the actual st
 
 # Known Gaps
 
-- [ ] std::hash (variant / string_view)
 - [ ] forwarding allocators (variant)
 - [ ] noexcept specifications are missing/incomplete
 - [ ] constexpr specifications are missing/incomplete

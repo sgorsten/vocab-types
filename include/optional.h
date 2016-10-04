@@ -142,6 +142,29 @@ template<class T> constexpr bool operator> (const T& value, const optional<T>& o
 template<class T> constexpr bool operator>=(const optional<T>& opt, const T& value) { return opt >= optional<T>{value}; } // (29)
 template<class T> constexpr bool operator>=(const T& value, const optional<T>& opt) { return optional<T>{value} >= opt; } // (30)
 
-}
+/////////////////////////////////////////////////////////////////////////////////////
+// make_optional - http://en.cppreference.com/w/cpp/utility/optional/make_optional //
+/////////////////////////////////////////////////////////////////////////////////////
+
+template<class T> constexpr std::optional<std::decay_t<T>> make_optional( T&& value ) { return std::optional<std::decay_t<T>>(std::forward<T>(value)); } // (1)
+template<class T, class... Args> constexpr std::optional<T> make_optional( Args&&... args ) { return std::optional<T>(std::in_place, std::forward<Args>(args)...); } // (2)
+template<class T, class U, class... Args> constexpr std::optional<T> make_optional( std::initializer_list<U> il, Args&&... args ) { return std::optional<T>(std::in_place, il, std::forward<Args>(args)...); } // (3)
+
+////////////////////////////////////////////////////////////////////
+// swap - http://en.cppreference.com/w/cpp/utility/optional/swap2 //
+////////////////////////////////////////////////////////////////////
+
+template<class T> void swap(optional<T>& lhs, optional<T>& rhs) noexcept(lhs.swap(rhs)) { lhs.swap(rhs); }
+
+/////////////////////////////////////////////////////////////////////////////
+// hash<optional> - http://en.cppreference.com/w/cpp/utility/optional/hash //
+/////////////////////////////////////////////////////////////////////////////
+
+template<class T> struct hash<std::optional<T>>
+{
+    size_t operator() (const std::optional<T> & key) noexcept { return key ? std::hash<T>{}(*key) : 0; }
+};
+
+} // namespace std
 
 #endif
