@@ -8,6 +8,9 @@
 
 TEST_CASE("std::variant<T...> traits")
 {
+    std::vector<int> a, b;
+    a.swap(b);
+
     typedef std::variant<bool, float> bool_float_variant;
     typedef std::variant<int, double, std::string> int_double_string_variant;
 

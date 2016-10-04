@@ -84,6 +84,8 @@ template<class Visitor, class Left, class Right, size_t I> auto visit_same(Left 
 template<class Visitor, class Left, class Right> auto visit_same(Left && l, Right && r, Visitor && vis) { return visit_same(std::forward<Left>(l), std::forward<Right>(r), index_t<variant_size<std::remove_reference_t<Right>>::value-1>{}, std::forward<Visitor>(vis)); }
 template<class T> void invoke_destructor(T & x) { x.~T(); }
 
+template<class Variant> void swap_contents(Variant & lhs, Variant & rhs) { using std::swap; visit_same(lhs, rhs, [](auto & l, auto & r) { return swap(l, r); }); }
+
 } // namespace std::detail
 
 ////////////////////////////////////////////////////////////////
@@ -172,7 +174,7 @@ public:
         if(_Index == rhs._Index)
         {
             if(_Index == variant_npos) return;
-            detail::visit_same(*this, rhs, [](auto & l, auto & r) { return swap(l, r); });
+            detail::swap_contents(*this, rhs);
         }
         else
         {

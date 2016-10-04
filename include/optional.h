@@ -27,7 +27,7 @@ public:
     // (constructor) - http://en.cppreference.com/w/cpp/utility/optional/optional //
     ////////////////////////////////////////////////////////////////////////////////
 
-    constexpr optional() = default; // (1)
+    constexpr optional() {}; // (1)
     constexpr optional(nullopt_t) {} // (1)
     optional(const optional & other) = default; // (2)
     optional(optional && other) = default; // (3)
