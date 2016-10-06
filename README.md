@@ -5,11 +5,9 @@ Platform | Build Status |
 
 # vocab-types
 
-This is a doomed project. Its days were numbered before it even began.
+This project provides an independent implementation of the functionality provided by the <variant>, <optional>, <any>, and <string_view> C++17 standard library headers. It is intended to provide the full, standards-compliant functionality of these headers, but compile cleanly on the major existing C++14 compilers, namely Microsoft Visual Studio 2015, GCC 6.0, and Clang 3.7. I personally feel that the functionality of the vocabulary types provided by these headers is so valuable to code clarity, that they are worth adopting early. For that reason, I will maintain this repository, adding missing features, fixing bugs, and improving compliance with the C++17 standard, until such time as these headers become available in an official capacity.
 
-It is an independent implementation of some of the new vocabulary types which are being introduced in the C++17 standard library. While these types are already available on some compilers within the `std::experimental` namespace, they are not presently available in official capacity within Visual Studio. I feel that these types are important enough in their ability to clarify the semantics of C++ code that they are worth adopting early. To that end, I will maintain this repository, striving (but probably not succeeding) to produce a standards-compliant implementation of these types, until such time as they become available by default.
-
-Note that as these files are intended to be temporary standins for the actual standard library headers, they define their types in `namespace std`, which is normally reserved for the standard library implementation.
+Note that, as these files are intended to be a valid implementation of the actual standard library headers, they define their types in `namespace std`.
 
 # Contents
 
