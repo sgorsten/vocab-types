@@ -1,7 +1,9 @@
+[![License is Unlicense](http://img.shields.io/badge/license-Unlicense-blue.svg?style=flat)](http://unlicense.org/)
+
 Platform | Build Status |
 -------- | ------------ |
 | Visual Studio 2015 | [Appveyor](http://appveyor.com): [![Build status](https://ci.appveyor.com/api/projects/status/1ylttmu6a95uhsoy?svg=true)](https://ci.appveyor.com/project/sgorsten/vocab-types) |
-| GCC 4.9 and Clang 3.7 | [Travis CI](http://travis-ci.org): [![Build status](http://travis-ci.org/sgorsten/vocab-types.svg?branch=master)](https://travis-ci.org/sgorsten/vocab-types) |
+| GCC 6.0 and Clang 3.7 | [Travis CI](http://travis-ci.org): [![Build status](http://travis-ci.org/sgorsten/vocab-types.svg?branch=master)](https://travis-ci.org/sgorsten/vocab-types) |
 
 # vocab-types
 
