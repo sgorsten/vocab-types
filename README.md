@@ -9,15 +9,7 @@ Platform | Build Status |
 
 This project provides an independent implementation of the functionality provided by the <variant>, <optional>, <any>, and <string_view> C++17 standard library headers. It is intended to provide the full, standards-compliant functionality of these headers, but compile cleanly on the major existing C++14 compilers, namely Microsoft Visual Studio 2015, GCC 6.0, and Clang 3.7. I personally feel that the functionality of the vocabulary types provided by these headers is so valuable to code clarity, that they are worth adopting early. For that reason, I will maintain this repository, adding missing features, fixing bugs, and improving compliance with the C++17 standard, until such time as these headers become available in an official capacity.
 
-Note that, as these files are intended to be a valid implementation of the actual standard library headers, they define their types in `namespace std`.
-
-# Contents
-
-- [string_view.h](/include/string_view.h): A standin for the `<string_view>` standard library header
-- [optional.h](/include/optional.h): A standin for the `<optional>` standard library header
-- [variant.h](/include/variant.h): A standin for the `<variant>` standard library header
-- [any.h](/include/any.h): A standin for the `<any>` standard library header
-- [utility.h](/include/utility.h): Contains the additions to the `<utility>` standard library header required by `std::optional<T>`, `std::variant<T...>`, and `std::any`
+Note that, as these files are intended to be a valid implementation of the actual standard library headers, they define their types in `namespace std`. The intention is that you can start using them in your code exactly as you would an official implementation, and when an official implementation becomes available, simply delete these files from your source tree to transition over.
 
 # Known Gaps
 

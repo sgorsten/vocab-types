@@ -7,25 +7,28 @@
     <Filter Include="test">
       <UniqueIdentifier>{cfef1c80-3b13-4489-a93e-cb5e7be2b03f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\vocab-types-impl">
+      <UniqueIdentifier>{b2907700-6d46-4b49-8d29-eaad53d4062f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\optional.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\variant.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="doctest.h">
       <Filter>test</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\any.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\include\vocab-types-impl\any.h">
+      <Filter>include\vocab-types-impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\utility.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\include\vocab-types-impl\optional.h">
+      <Filter>include\vocab-types-impl</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\string_view.h">
-      <Filter>include</Filter>
+    <ClInclude Include="..\include\vocab-types-impl\string_view.h">
+      <Filter>include\vocab-types-impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\vocab-types-impl\utility.h">
+      <Filter>include\vocab-types-impl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\vocab-types-impl\variant.h">
+      <Filter>include\vocab-types-impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -44,5 +47,19 @@
     <ClCompile Include="test-string_view.cpp">
       <Filter>test</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\any">
+      <Filter>include</Filter>
+    </None>
+    <None Include="..\include\optional">
+      <Filter>include</Filter>
+    </None>
+    <None Include="..\include\string_view">
+      <Filter>include</Filter>
+    </None>
+    <None Include="..\include\variant">
+      <Filter>include</Filter>
+    </None>
   </ItemGroup>
 </Project>

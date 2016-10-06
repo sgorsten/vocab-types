@@ -153,12 +153,18 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\any.h" />
-    <ClInclude Include="..\include\optional.h" />
-    <ClInclude Include="..\include\string_view.h" />
-    <ClInclude Include="..\include\utility.h" />
-    <ClInclude Include="..\include\variant.h" />
+    <ClInclude Include="..\include\vocab-types-impl\any.h" />
+    <ClInclude Include="..\include\vocab-types-impl\optional.h" />
+    <ClInclude Include="..\include\vocab-types-impl\string_view.h" />
+    <ClInclude Include="..\include\vocab-types-impl\utility.h" />
+    <ClInclude Include="..\include\vocab-types-impl\variant.h" />
     <ClInclude Include="doctest.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\include\any" />
+    <None Include="..\include\optional" />
+    <None Include="..\include\string_view" />
+    <None Include="..\include\variant" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

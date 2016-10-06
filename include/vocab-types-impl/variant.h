@@ -93,7 +93,7 @@ template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> &
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v);
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const && get(const variant<Types...> && v);
 
-namespace detail {
+namespace _Early17 {
 
 // Determine which constructor would be selected based on a type
 template<class... Types> struct constructor_selection_helper {};
@@ -116,7 +116,7 @@ template<class T> void invoke_destructor(T & x) { x.~T(); }
 
 template<class Variant> void swap_contents(Variant & lhs, Variant & rhs) { using std::swap; visit_same(lhs, rhs, [](auto & l, auto & r) { return swap(l, r); }); }
 
-} // namespace std::detail
+} // namespace std::_Early17
 
 ////////////////////////////////////////////////////////////////
 // variant - http://en.cppreference.com/w/cpp/utility/variant //
@@ -167,8 +167,8 @@ public:
 
     template<class T> std::enable_if_t<!std::is_same<std::remove_reference_t<std::remove_cv_t<T>>, variant>::value, variant> & operator=(T && t) // (3)
     {
-        using U = decltype(detail::construct<Types...>(std::forward<T>(t)));
-        constexpr size_t I = detail::index_of<U, Types...>::value;
+        using U = decltype(_Early17::construct<Types...>(std::forward<T>(t)));
+        constexpr size_t I = _Early17::index_of<U, Types...>::value;
         if(_Index == I) reinterpret_cast<variant_alternative_t<I, variant<Types...>> &>(_Storage) = std::forward<T>(t);
         else emplace<I>(std::forward<T>(t));
         return *this;
@@ -190,8 +190,8 @@ public:
     // emplace - http://en.cppreference.com/w/cpp/utility/variant/emplace/ //
     /////////////////////////////////////////////////////////////////////////
 
-    template<class T, class... Args> void emplace(Args&&... args) { emplace<detail::index_of<T, Types...>::value>(std::forward<Args>(args)...); }                                                                       // (1)
-    template<class T, class U, class... Args> void emplace(std::initializer_list<U> il, Args&&... args) { emplace<detail::index_of<T, Types...>::value>(il, std::forward<Args>(args)...); }                             // (2)
+    template<class T, class... Args> void emplace(Args&&... args) { emplace<_Early17::index_of<T, Types...>::value>(std::forward<Args>(args)...); }                                                                       // (1)
+    template<class T, class U, class... Args> void emplace(std::initializer_list<U> il, Args&&... args) { emplace<_Early17::index_of<T, Types...>::value>(il, std::forward<Args>(args)...); }                             // (2)
     template<size_t I, class... Args> void emplace(Args&&... args) { _Reset(); new(&_Storage) variant_alternative_t<I, variant>(std::forward<Args>(args)...); _Index = I; }                                             // (3)
     template<size_t I, class U, class... Args> void emplace(std::initializer_list<U> il, Args&&... args) { _Reset(); new(&_Storage) variant_alternative_t<I, variant>(il, std::forward<Args>(args)...); _Index = I; }   // (4)
 
@@ -204,7 +204,7 @@ public:
         if(_Index == rhs._Index)
         {
             if(_Index == variant_npos) return;
-            detail::swap_contents(*this, rhs);
+            _Early17::swap_contents(*this, rhs);
         }
         else
         {
@@ -221,7 +221,7 @@ public:
     {
         if(_Index != variant_npos)
         {
-            visit([](auto & x) { detail::invoke_destructor(x); }, *this);
+            visit([](auto & x) { _Early17::invoke_destructor(x); }, *this);
             _Index = variant_npos;
         }
     }
@@ -230,7 +230,7 @@ public:
     { 
         _Reset();
         _Index = rhs._Index;
-        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::forward<decltype(r)>(r)); }); 
+        _Early17::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { new(&l) std::remove_reference_t<decltype(l)>(std::forward<decltype(r)>(r)); }); 
     }
     catch(...)
     {
@@ -241,7 +241,7 @@ public:
     template<class U> void _Assign(U && rhs)
     {
         assert(_Index == rhs._Index);
-        detail::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { l = std::forward<decltype(r)>(r); });
+        _Early17::visit_same(*this, std::forward<U>(rhs), [](auto & l, auto && r) { l = std::forward<decltype(r)>(r); });
     }
 
     std::aligned_union_t<0, Types...> _Storage;
@@ -255,7 +255,7 @@ public:
 template<class Visitor> auto visit(Visitor && vis) { return vis(); }
 template<class Visitor, class First, class... Rest> auto visit(Visitor && vis, First && first, Rest &&... rest)
 { 
-    return detail::visit(first, detail::index_t<std::variant_size<std::remove_reference_t<First>>::value-1>{}, [&](auto && x) 
+    return _Early17::visit(first, _Early17::index_t<std::variant_size<std::remove_reference_t<First>>::value-1>{}, [&](auto && x) 
     { 
         return visit([&](auto &&... args) 
         { 
@@ -268,7 +268,7 @@ template<class Visitor, class First, class... Rest> auto visit(Visitor && vis, F
 // holds_alternative - http://en.cppreference.com/w/cpp/utility/variant/holds_alternative //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-template<class T, class... Types> constexpr bool holds_alternative(const variant<Types...> & v) { return detail::index_of<T, Types...>::value == v.index(); }
+template<class T, class... Types> constexpr bool holds_alternative(const variant<Types...> & v) { return _Early17::index_of<T, Types...>::value == v.index(); }
 
 ////////////////////////////////////////////////////////////////
 // get - http://en.cppreference.com/w/cpp/utility/variant/get //
@@ -278,10 +278,10 @@ template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> &
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> && get(variant<Types...> && v) { return std::move(get<I>(v)); }                        
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const & get(const variant<Types...> & v) { if(v.index() == I) return reinterpret_cast<variant_alternative_t<I, variant<Types...>> const &>(v._Storage); throw bad_variant_access{}; }
 template<size_t I, class... Types> variant_alternative_t<I, variant<Types...>> const && get(const variant<Types...> && v) { return std::move(get<I>(v)); }
-template<class T, class... Types> constexpr       T &  get(      variant<Types...> &  v) { return get<detail::index_of<T, Types...>::value>(v); }
-template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<detail::index_of<T, Types...>::value>(std::move(v)); }
-template<class T, class... Types> constexpr const T &  get(const variant<Types...> &  v) { return get<detail::index_of<T, Types...>::value>(v); }
-template<class T, class... Types> constexpr const T && get(const variant<Types...> && v) { return get<detail::index_of<T, Types...>::value>(std::move(v)); }
+template<class T, class... Types> constexpr       T &  get(      variant<Types...> &  v) { return get<_Early17::index_of<T, Types...>::value>(v); }
+template<class T, class... Types> constexpr       T && get(      variant<Types...> && v) { return get<_Early17::index_of<T, Types...>::value>(std::move(v)); }
+template<class T, class... Types> constexpr const T &  get(const variant<Types...> &  v) { return get<_Early17::index_of<T, Types...>::value>(v); }
+template<class T, class... Types> constexpr const T && get(const variant<Types...> && v) { return get<_Early17::index_of<T, Types...>::value>(std::move(v)); }
 
 //////////////////////////////////////////////////////////////////////
 // get_if - http://en.cppreference.com/w/cpp/utility/variant/get_if //
@@ -289,8 +289,8 @@ template<class T, class... Types> constexpr const T && get(const variant<Types..
 
 template<std::size_t I, class... Types> constexpr std::add_pointer_t<std::variant_alternative_t<I, std::variant<Types...>>> get_if(std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &std::get<I>(*pv) : nullptr; }
 template<std::size_t I, class... Types> constexpr std::add_pointer_t<const std::variant_alternative_t<I, variant<Types...>>> get_if(const std::variant<Types...>* pv) noexcept { return pv && pv->index() == I ? &std::get<I>(*pv) : nullptr; }
-template<class T, class... Types> constexpr std::add_pointer_t<T> get_if(variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
-template<class T, class... Types> constexpr std::add_pointer_t<const T> get_if(const variant<Types...>* pv) noexcept { return get_if<detail::index_of<T, Types...>::value>(pv); }
+template<class T, class... Types> constexpr std::add_pointer_t<T> get_if(variant<Types...>* pv) noexcept { return get_if<_Early17::index_of<T, Types...>::value>(pv); }
+template<class T, class... Types> constexpr std::add_pointer_t<const T> get_if(const variant<Types...>* pv) noexcept { return get_if<_Early17::index_of<T, Types...>::value>(pv); }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // operator==, !=, <, <=, >, >= - http://en.cppreference.com/w/cpp/utility/variant/operator_cmp //
@@ -300,13 +300,13 @@ template<class... Types> constexpr bool operator==(const variant<Types...>& v, c
 { 
     return v.index() != w.index() ? false 
         : v.valueless_by_exception() ? true 
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a == b; });
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a == b; });
 }
 template<class... Types> constexpr bool operator!=(const variant<Types...>& v, const variant<Types...>& w) // (2)
 { 
     return v.index() != w.index() ? true 
         : v.valueless_by_exception() ? false 
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a != b; }); 
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a != b; }); 
 } 
 template<class... Types> constexpr bool operator<(const variant<Types...>& v, const variant<Types...>& w) // (3)
 { 
@@ -314,7 +314,7 @@ template<class... Types> constexpr bool operator<(const variant<Types...>& v, co
         : v.valueless_by_exception() ? true
         : v.index() < w.index() ? true
         : v.index() > w.index() ? false
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a < b; });
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a < b; });
 }
 template<class... Types> constexpr bool operator>(const variant<Types...>& v, const variant<Types...>& w) // (4)
 { 
@@ -322,7 +322,7 @@ template<class... Types> constexpr bool operator>(const variant<Types...>& v, co
         : w.valueless_by_exception() ? true
         : v.index() > w.index() ? true
         : v.index() < w.index() ? false
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a > b; });
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a > b; });
 }
 template<class... Types> constexpr bool operator<=(const variant<Types...>& v, const variant<Types...>& w) // (5)
 { 
@@ -330,7 +330,7 @@ template<class... Types> constexpr bool operator<=(const variant<Types...>& v, c
         : w.valueless_by_exception() ? false
         : v.index() < w.index() ? true
         : v.index() > w.index() ? false
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a <= b; });
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a <= b; });
 }
 template<class... Types> constexpr bool operator>=(const variant<Types...>& v, const variant<Types...>& w) // (5)
 { 
@@ -338,7 +338,7 @@ template<class... Types> constexpr bool operator>=(const variant<Types...>& v, c
         : v.valueless_by_exception() ? false
         : v.index() > w.index() ? true
         : v.index() < w.index() ? false
-        : detail::visit_same(v, w, [](const auto & a, const auto & b) { return a >= b; });
+        : _Early17::visit_same(v, w, [](const auto & a, const auto & b) { return a >= b; });
 }
 	
 ////////////////////////////////////////////////////////////////////////
