@@ -13,11 +13,12 @@ Note that, as these files are intended to be a valid implementation of the actua
 
 # Known Gaps
 
-- [ ] forwarding allocators (variant)
-- [ ] noexcept specifications are missing/incomplete
-- [ ] constexpr specifications are missing/incomplete
-- [ ] SFINAE for disabling some overloads based on type traits
-- [ ] Most of the API needs to be tested (are there existing unit tests for this?)
+- Allocator forwarding constructors (variant) have not been implemented
+- noexcept specifications are incomplete
+- constexpr specifications are incomplete
+- SFINAE for disabling some overloads based on type traits has not been implemented
+- Most of the API needs to be tested (are there existing unit tests for this?)
+- In a standards compliant implementation, `std::basic_string` is responsible for conversion to/from `std::basic_string_view`. Since this library only introduces `std::basic_string_view` and does not modify the definition of any existing standard library classes, we have to reverse this responsibility and add it to `std::basic_string_view` instead. This may lead to some subtly different behavior in some cases.
 
 # License
 

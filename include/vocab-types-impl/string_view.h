@@ -276,6 +276,20 @@ public:
     ///////////////////////////////////////////////////////////////////////////
 
     static constexpr const size_type npos = size_type(-1);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // NOTE: In a standards-compliant implementation, it is the responsibility of basic_string to provide an //
+    // implicit conversion to basic_string_view and an explicit constructor from basic_string_view. Since we //
+    // cannot modify the definition of basic_string, we are instead providing an implicit constructor from   //
+    // basic_string and an explicit conversion to basic_string. In doing so, we lose the ability to pass an  //
+    // allocator to basic_string's constructor, but otherwise hopefully maintain reasonable compatibility.   //
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Instead of: basic_string<CharT, Traits>::operator basic_string_view<CharT, Traits>() const noexcept;
+    basic_string_view(const basic_string<CharT, Traits> & s) noexcept : basic_string_view{s.data(), s.size()} {}
+
+    // Instead of: explicit basic_string::basic_string(basic_string_view<CharT, Traits> sv, const Allocator& alloc = Allocator());
+    explicit operator basic_string<CharT, Traits>() const { return {data(), size()}; }
 };
 
 template<class CharT, class Traits> const size_t std::basic_string_view<CharT, Traits>::npos;
