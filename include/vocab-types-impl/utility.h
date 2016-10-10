@@ -1,5 +1,5 @@
 // utility.h is an independent implementation of the additions made to the
-// <string_view> standard library header in C++17, which can be compiled by 
+// <utility> standard library header in C++17, which can be compiled by 
 // C++14 compliant compilers. The original author of this file is Sterling Orsten, 
 // and its permanent home is https://github.com/sgorsten/vocab-types
 
